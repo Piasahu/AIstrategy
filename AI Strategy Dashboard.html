@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Strategy Dashboard - Data, Analytics & AI</title>
+    <style>
+        :root {
+            --color-primary: #0284c7;
+            --color-primary-hover: #0369a1;
+            --color-secondary: #64748b;
+            --color-bg: #f8fafc;
+            --color-surface: #ffffff;
+            --color-text: #0f172a;
+            --color-text-light: #475569;
+            --color-border: #e2e8f0;
+            --color-accent-1: #06b6d4;
+            --color-accent-2: #8b5cf6;
+            --color-accent-3: #ec4899;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, var(--color-primary) 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .language-toggle {
+            display: flex;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--color-border);
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--color-text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            margin-bottom: -2px;
+        }
+
+        .nav-tab:hover {
+            color: var(--color-primary);
+        }
+
+        .nav-tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-4px);
+            border-color: var(--color-primary);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        .card-description {
+            font-size: 13px;
+            color: var(--color-text-light);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .card-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .metric-label {
+            color: var(--color-text-light);
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 16px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .status-high-value {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+        }
+
+        .status-moderate {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--color-warning);
+        }
+
+        .status-low-effort {
+            background: rgba(2, 132, 199, 0.1);
+            color: var(--color-primary);
+        }
+
+        .matrix-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .matrix-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .matrix-cell {
+            padding: 16px;
+            background: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .matrix-cell:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .matrix-cell-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .matrix-cell-desc {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .roadmap-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .roadmap-phase {
+            padding: 16px;
+            margin-bottom: 12px;
+            background: var(--color-bg);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-phase:hover {
+            background: #eff6ff;
+            border-left-color: var(--color-primary-hover);
+        }
+
+        .roadmap-phase-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--color-text);
+            margin-bottom: 6px;
+        }
+
+        .roadmap-phase-desc {
+            font-size: 13px;
+            color: var(--color-text-light);
+        }
+
+        .metric-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+        }
+
+        .metric-table th {
+            background: var(--color-bg);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .metric-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+
+        .metric-table tr:hover {
+            background: rgba(2, 132, 199, 0.03);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        .cta-button:hover {
+            background: var(--color-primary-hover);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--color-text-light);
+            font-size: 12px;
+            border-top: 1px solid var(--color-border);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <div class="header-title" data-en="AI Strategy Dashboard" data-es="Panel de Estrategia de IA">AI Strategy Dashboard</div>
+            <div class="header-subtitle" data-en="Data, Analytics & Generative AI - From Promise to Execution" data-es="Datos, Analytics e IA Generativa - De la Promesa a la Ejecución">Data, Analytics & Generative AI - From Promise to Execution</div>
+        </div>
+        <div class="language-toggle">
+            <button class="lang-btn active" onclick="setLanguage('en')">English</button>
+            <button class="lang-btn" onclick="setLanguage('es')">Español</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('overview')" data-en="Overview" data-es="Descripción General">Overview</button>
+            <button class="nav-tab" onclick="switchTab('data-strategy')" data-en="Data Strategy" data-es="Estrategia de Datos">Data Strategy</button>
+            <button class="nav-tab" onclick="switchTab('ai-processes')" data-en="AI & GenAI" data-es="IA y GenAI">AI & GenAI</button>
+            <button class="nav-tab" onclick="switchTab('use-cases')" data-en="Use Cases" data-es="Casos de Uso">Use Cases</button>
+            <button class="nav-tab" onclick="switchTab('governance')" data-en="Governance" data-es="Gobernanza">Governance</button>
+            <button class="nav-tab" onclick="switchTab('roadmap')" data-en="Roadmap" data-es="Plan de Ruta">Roadmap</button>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div id="overview" class="tab-content active">
+            <div class="section-title" data-en="Executive Overview" data-es="Descripción Ejecutiva">Executive Overview</div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Current State" data-es="Estado Actual">Current State</div>
+                            <div class="card-description" data-en="74% of companies have AI programs, but only 26% achieve tangible value" data-es="El 74% de las empresas tiene programas de IA, pero solo el 26% logra valor tangible">74% of companies have AI programs, but only 26% achieve tangible value</div>
+                        </div>
+                        <div class="card-icon">📊</div>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Value Realization Gap" data-es="Brecha de Realización de Valor">Value Realization Gap</span>
+                        <span class="metric-value">48%</span>
+                    </div>
+                    <span class="status-badge status-high-value" data-en="Critical Priority" data-es="Prioridad Crítica">Critical Priority</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="LATAM Opportunity" data-es="Oportunidad LATAM">LATAM Opportunity</div>
+                            <div class="card-description" data-en="LATAM AI adoption accelerating: 67% increase in 2 years vs 59% global" data-es="Adopción de IA en LATAM acelerándose: aumento del 67% en 2 años vs 59% global">LATAM AI adoption accelerating: 67% increase in 2 years vs 59% global</div>
+                        </div>
+                        <div class="card-icon">🚀</div>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Regional Growth" data-es="Crecimiento Regional">Regional Growth</span>
+                        <span class="metric-value">+67%</span>
+                    </div>
+                    <span class="status-badge status-high-value" data-en="High Opportunity" data-es="Gran Oportunidad">High Opportunity</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Success Drivers" data-es="Impulsores del Éxito">Success Drivers</div>
+                            <div class="card-description" data-en="Top performers derive 62% value from core processes, 38% from support" data-es="Los mejores derivan el 62% del valor de procesos principales, 38% de soporte">Top performers derive 62% value from core processes, 38% from support</div>
+                        </div>
+                        <div class="card-icon">⭐</div>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Focus Areas" data-es="Áreas de Enfoque">Focus Areas</span>
+                        <span class="metric-value">Core First</span>
+                    </div>
+                    <span class="status-badge status-high-value" data-en="Clear Strategy" data-es="Estrategia Clara">Clear Strategy</span>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="Three Pillars Framework" data-es="Marco de Tres Pilares">Three Pillars Framework</div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">1️⃣ <span data-en="Data Strategy" data-es="Estrategia de Datos">Data Strategy</span></div>
+                        </div>
+                    </div>
+                    <div class="card-description" data-en="Governance, quality, privacy, ownership, single source of truth" data-es="Gobernanza, calidad, privacidad, propiedad, fuente única de verdad">Governance, quality, privacy, ownership, single source of truth</div>
+                    <button class="cta-button" onclick="switchTab('data-strategy')" data-en="Learn More" data-es="Aprende Más">Learn More →</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">2️⃣ <span data-en="AI & GenAI Integration" data-es="Integración de IA y GenAI">AI & GenAI Integration</span></div>
+                        </div>
+                    </div>
+                    <div class="card-description" data-en="Process redesign, productivity, risk management, role evolution" data-es="Rediseño de procesos, productividad, gestión de riesgos, evolución de roles">Process redesign, productivity, risk management, role evolution</div>
+                    <button class="cta-button" onclick="switchTab('ai-processes')" data-en="Learn More" data-es="Aprende Más">Learn More →</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">3️⃣ <span data-en="Use Case Design" data-es="Diseño de Casos de Uso">Use Case Design</span></div>
+                        </div>
+                    </div>
+                    <div class="card-description" data-en="Value, effort, risk prioritization, MVP to scale, measurement" data-es="Valor, esfuerzo, priorización de riesgos, MVP a escala, medición">Value, effort, risk prioritization, MVP to scale, measurement</div>
+                    <button class="cta-button" onclick="switchTab('use-cases')" data-en="Learn More" data-es="Aprende Más">Learn More →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATA STRATEGY TAB -->
+        <div id="data-strategy" class="tab-content">
+            <div class="section-title" data-en="Data Strategy Foundations" data-es="Fundamentos de Estrategia de Datos">Data Strategy Foundations</div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Governance" data-es="Gobernanza">Governance</div>
+                        </div>
+                        <div class="card-icon">📋</div>
+                    </div>
+                    <div class="card-description" data-en="Policies, standards, accountability, decision-making frameworks" data-es="Políticas, estándares, responsabilidad, marcos de toma de decisiones">Policies, standards, accountability, decision-making frameworks</div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Maturity Gap" data-es="Brecha de Madurez">Maturity Gap</span>
+                        <span class="metric-value" data-en="High" data-es="Alto">High</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Data Quality" data-es="Calidad de Datos">Data Quality</div>
+                        </div>
+                        <div class="card-icon">✅</div>
+                    </div>
+                    <div class="card-description" data-en="Completeness, accuracy, consistency, timeliness, validity" data-es="Integridad, precisión, consistencia, puntualidad, validez">Completeness, accuracy, consistency, timeliness, validity</div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Target Accuracy" data-es="Precisión Objetivo">Target Accuracy</span>
+                        <span class="metric-value">98%</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Privacy & Compliance" data-es="Privacidad y Cumplimiento">Privacy & Compliance</div>
+                        </div>
+                        <div class="card-icon">🔒</div>
+                    </div>
+                    <div class="card-description" data-en="LGPD (Brazil), LFPDPPP (Mexico), emerging LATAM regulations" data-es="LGPD (Brasil), LFPDPPP (México), regulaciones LATAM emergentes">LGPD (Brazil), LFPDPPP (Mexico), emerging LATAM regulations</div>
+                    <span class="status-badge status-high-value" data-en="Non-Negotiable" data-es="Innegociable">Non-Negotiable</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Data Ownership" data-es="Propiedad de Datos">Data Ownership</div>
+                        </div>
+                        <div class="card-icon">👤</div>
+                    </div>
+                    <div class="card-description" data-en="Clear accountability: Owner, Steward, Custodian, Sponsor roles" data-es="Responsabilidad clara: roles Propietario, Administrador, Custodio, Patrocinador">Clear accountability: Owner, Steward, Custodian, Sponsor roles</div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Clarity" data-es="Claridad">Clarity</span>
+                        <span class="metric-value" data-en="Essential" data-es="Esencial">Essential</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Single Source of Truth" data-es="Fuente Única de Verdad">Single Source of Truth</div>
+                        </div>
+                        <div class="card-icon">🎯</div>
+                    </div>
+                    <div class="card-description" data-en="Authoritative, consolidated repository of business metrics and dimensions" data-es="Repositorio autorizado y consolidado de métricas y dimensiones comerciales">Authoritative, consolidated repository of business metrics and dimensions</div>
+                    <span class="status-badge status-low-effort" data-en="Master Data Mgmt" data-es="Gestión Maestro">Master Data Mgmt</span>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="LATAM Implementation Priorities" data-es="Prioridades de Implementación LATAM">LATAM Implementation Priorities</div>
+            
+            <div class="roadmap-container">
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title">1. <span data-en="Assess Current State" data-es="Evaluar Estado Actual">Assess Current State</span></div>
+                    <div class="roadmap-phase-desc" data-en="Audit data infrastructure, governance maturity, regulatory gaps" data-es="Auditar infraestructura de datos, madurez de gobernanza, brechas regulatorias">Audit data infrastructure, governance maturity, regulatory gaps</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title">2. <span data-en="Define Strategic Priorities" data-es="Definir Prioridades Estratégicas">Define Strategic Priorities</span></div>
+                    <div class="roadmap-phase-desc" data-en="Align with business goals, customer experience, operational efficiency" data-es="Alinear con objetivos comerciales, experiencia del cliente, eficiencia operativa">Align with business goals, customer experience, operational efficiency</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title">3. <span data-en="Phased Implementation" data-es="Implementación por Fases">Phased Implementation</span></div>
+                    <div class="roadmap-phase-desc" data-en="Start with highest-impact data domains; expand incrementally" data-es="Comenzar con los dominios de datos de mayor impacto; expandir incrementalmente">Start with highest-impact data domains; expand incrementally</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI & GENAI TAB -->
+        <div id="ai-processes" class="tab-content">
+            <div class="section-title" data-en="AI & Generative AI Integration" data-es="Integración de IA y IA Generativa">AI & Generative AI Integration</div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Productivity Gains" data-es="Ganancias de Productividad">Productivity Gains</div>
+                        </div>
+                        <div class="card-icon">📈</div>
+                    </div>
+                    <div class="card-description" data-en="GenAI assists content creation, research, code generation, customer service automation" data-es="GenAI asiste en creación de contenido, investigación, generación de código, automatización de atención al cliente">GenAI assists content creation, research, code generation, customer service automation</div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Time Savings" data-es="Ahorro de Tiempo">Time Savings</span>
+                        <span class="metric-value">30-50%</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Core Process Value" data-es="Valor del Proceso Principal">Core Process Value</div>
+                        </div>
+                        <div class="card-icon">⚙️</div>
+                    </div>
+                    <div class="card-description" data-en="Operations 23%, Sales & Marketing 20%, R&D 13%, Support Functions 44%" data-es="Operaciones 23%, Ventas y Marketing 20%, I+D 13%, Funciones de Apoyo 44%">Operations 23%, Sales & Marketing 20%, R&D 13%, Support Functions 44%</div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Value Distribution" data-es="Distribución de Valor">Value Distribution</span>
+                        <span class="metric-value">Core: 62%</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Risk Management" data-es="Gestión de Riesgos">Risk Management</div>
+                        </div>
+                        <div class="card-icon">⚠️</div>
+                    </div>
+                    <div class="card-description" data-en="Data quality, bias, security, privacy, drift, explainability, automation risks" data-es="Calidad de datos, sesgo, seguridad, privacidad, deriva, explicabilidad, riesgos de automatización">Data quality, bias, security, privacy, drift, explainability, automation risks</div>
+                    <span class="status-badge status-high-value" data-en="Active Mitigation" data-es="Mitigación Activa">Active Mitigation</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Organizational Evolution" data-es="Evolución Organizacional">Organizational Evolution</div>
+                        </div>
+                        <div class="card-icon">👥</div>
+                    </div>
+                    <div class="card-description" data-en="New roles: AI/ML Engineers, Data Scientists, Ethics Specialists, Change Managers" data-es="Nuevos roles: Ingenieros de IA/ML, Científicos de Datos, Especialistas de Ética, Gestores de Cambio">New roles: AI/ML Engineers, Data Scientists, Ethics Specialists, Change Managers</div>
+                    <span class="status-badge status-moderate" data-en="Reskilling Required" data-es="Se Requiere Recapacitación">Reskilling Required</span>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="GenAI Use Cases by Function" data-es="Casos de Uso de GenAI por Función">GenAI Use Cases by Function</div>
+            
+            <table class="metric-table">
+                <thead>
+                    <tr>
+                        <th data-en="Function" data-es="Función">Function</th>
+                        <th data-en="GenAI Application" data-es="Aplicación GenAI">GenAI Application</th>
+                        <th data-en="Expected Impact" data-es="Impacto Esperado">Expected Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-en="Customer Service" data-es="Servicio al Cliente">Customer Service</td>
+                        <td data-en="AI Chatbots, Sentiment Analysis, Knowledge Management" data-es="Chatbots de IA, Análisis de Sentimientos, Gestión del Conocimiento">AI Chatbots, Sentiment Analysis, Knowledge Management</td>
+                        <td data-en="40-50% time savings" data-es="40-50% ahorro de tiempo">40-50% time savings</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Content & Marketing" data-es="Contenido y Marketing">Content & Marketing</td>
+                        <td data-en="Document drafting, Personalization, Lead Scoring" data-es="Redacción de documentos, Personalización, Puntuación de Leads">Document drafting, Personalization, Lead Scoring</td>
+                        <td data-en="30-40% productivity gain" data-es="Ganancia de productividad del 30-40%">30-40% productivity gain</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Operations" data-es="Operaciones">Operations</td>
+                        <td data-en="Predictive Maintenance, Supply Chain, Quality Assurance" data-es="Mantenimiento Predictivo, Cadena de Suministros, Aseguramiento de Calidad">Predictive Maintenance, Supply Chain, Quality Assurance</td>
+                        <td data-en="20-30% cost reduction" data-es="Reducción de costos del 20-30%">20-30% cost reduction</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Finance" data-es="Finanzas">Finance</td>
+                        <td data-en="Fraud Detection, Process Automation, Risk Assessment" data-es="Detección de Fraude, Automatización de Procesos, Evaluación de Riesgos">Fraud Detection, Process Automation, Risk Assessment</td>
+                        <td data-en="Compliance + 25-35% efficiency" data-es="Cumplimiento + 25-35% eficiencia">Compliance + 25-35% efficiency</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- USE CASES TAB -->
+        <div id="use-cases" class="tab-content">
+            <div class="section-title" data-en="Use Case Design & Execution" data-es="Diseño y Ejecución de Casos de Uso">Use Case Design & Execution</div>
+            
+            <div class="matrix-container">
+                <div class="matrix-title" data-en="Value-Effort-Risk (VER) Prioritization Matrix" data-es="Matriz de Priorización Valor-Esfuerzo-Riesgo (VER)">Value-Effort-Risk (VER) Prioritization Matrix</div>
+                <div class="matrix-grid">
+                    <div class="matrix-cell">
+                        <div class="matrix-cell-title">✨ <span data-en="ACCELERATE" data-es="ACELERAR">ACCELERATE</span></div>
+                        <div class="matrix-cell-desc" data-en="High Value / Low Effort / Low Risk → Quick Wins" data-es="Alto Valor / Bajo Esfuerzo / Bajo Riesgo → Ganancias Rápidas">High Value / Low Effort / Low Risk → Quick Wins</div>
+                    </div>
+                    <div class="matrix-cell">
+                        <div class="matrix-cell-title">🔍 <span data-en="INVESTIGATE" data-es="INVESTIGAR">INVESTIGATE</span></div>
+                        <div class="matrix-cell-desc" data-en="High Value / High Effort / Moderate Risk → Worth Pursuing" data-es="Alto Valor / Alto Esfuerzo / Riesgo Moderado → Vale la Pena">High Value / High Effort / Moderate Risk → Worth Pursuing</div>
+                    </div>
+                    <div class="matrix-cell">
+                        <div class="matrix-cell-title">🚫 <span data-en="DEFER" data-es="APLAZAR">DEFER</span></div>
+                        <div class="matrix-cell-desc" data-en="Low Value or High Risk → Revisit When Conditions Improve" data-es="Bajo Valor o Alto Riesgo → Revisar Cuando Mejoren las Condiciones">Low Value or High Risk → Revisit When Conditions Improve</div>
+                    </div>
+                    <div class="matrix-cell">
+                        <div class="matrix-cell-title">🌱 <span data-en="INCUBATE" data-es="INCUBAR">INCUBATE</span></div>
+                        <div class="matrix-cell-desc" data-en="Moderate Value / Moderate Effort / Moderate Risk → Prototype" data-es="Valor Moderado / Esfuerzo Moderado / Riesgo Moderado → Prototipo">Moderate Value / Moderate Effort / Moderate Risk → Prototype</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="MVP to Scale: Phased Delivery" data-es="MVP a Escala: Entrega por Fases">MVP to Scale: Phased Delivery</div>
+            
+            <div class="roadmap-container">
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Phase 1: Scoping & Business Case" data-es="Fase 1: Alcance y Caso de Negocio">Phase 1: Scoping & Business Case</div>
+                    <div class="roadmap-phase-desc" data-en="Define problem, quantify impact, assess data, estimate resources, identify risks" data-es="Definir problema, cuantificar impacto, evaluar datos, estimar recursos, identificar riesgos">Define problem, quantify impact, assess data, estimate resources, identify risks</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Phase 2: MVP Development (3-6 months)" data-es="Fase 2: Desarrollo MVP (3-6 meses)">Phase 2: MVP Development (3-6 months)</div>
+                    <div class="roadmap-phase-desc" data-en="Functional prototype, simple data, essential features only, establish baselines" data-es="Prototipo funcional, datos simples, características esenciales solo, establecer líneas base">Functional prototype, simple data, essential features only, establish baselines</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Phase 3: Pilot & Validation (2-4 months)" data-es="Fase 3: Piloto y Validación (2-4 meses)">Phase 3: Pilot & Validation (2-4 months)</div>
+                    <div class="roadmap-phase-desc" data-en="Limited rollout, gather production data, validate assumptions, assess readiness" data-es="Implementación limitada, recopilar datos de producción, validar suposiciones, evaluar preparación">Limited rollout, gather production data, validate assumptions, assess readiness</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Phase 4: Scale & Operations (6+ months)" data-es="Fase 4: Escala y Operaciones (6+ meses)">Phase 4: Scale & Operations (6+ months)</div>
+                    <div class="roadmap-phase-desc" data-en="Full deployment, production infrastructure, monitoring, retraining, governance audits" data-es="Implementación completa, infraestructura de producción, monitoreo, recapacitación, auditorías de gobernanza">Full deployment, production infrastructure, monitoring, retraining, governance audits</div>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="Measurement & KPIs" data-es="Medición y KPI">Measurement & KPIs</div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Level 1: Model Performance" data-es="Nivel 1: Desempeño del Modelo">Level 1: Model Performance</div>
+                        </div>
+                        <div class="card-icon">📊</div>
+                    </div>
+                    <div class="card-description" data-en="Accuracy, precision, recall, latency, data quality scores" data-es="Precisión, precisión, recall, latencia, puntajes de calidad de datos">Accuracy, precision, recall, latency, data quality scores</div>
+                    <span class="status-badge status-low-effort" data-en="Technical Health" data-es="Salud Técnica">Technical Health</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Level 2: Operational" data-es="Nivel 2: Operacional">Level 2: Operational</div>
+                        </div>
+                        <div class="card-icon">⚙️</div>
+                    </div>
+                    <div class="card-description" data-en="Adoption rate, usage frequency, system availability, error rates" data-es="Tasa de adopción, frecuencia de uso, disponibilidad del sistema, tasas de error">Adoption rate, usage frequency, system availability, error rates</div>
+                    <span class="status-badge status-low-effort" data-en="User Readiness" data-es="Preparación del Usuario">User Readiness</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Level 3: Business Impact" data-es="Nivel 3: Impacto Comercial">Level 3: Business Impact</div>
+                        </div>
+                        <div class="card-icon">💰</div>
+                    </div>
+                    <div class="card-description" data-en="Revenue, cost reduction, risk mitigation, customer satisfaction, market share" data-es="Ingresos, reducción de costos, mitigación de riesgos, satisfacción del cliente, cuota de mercado">Revenue, cost reduction, risk mitigation, customer satisfaction, market share</div>
+                    <span class="status-badge status-high-value" data-en="Most Important" data-es="Más Importante">Most Important</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GOVERNANCE TAB -->
+        <div id="governance" class="tab-content">
+            <div class="section-title" data-en="Enterprise AI Governance" data-es="Gobernanza de IA Empresarial">Enterprise AI Governance</div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Ethics & Fairness" data-es="Ética e Igualdad">Ethics & Fairness</div>
+                        </div>
+                        <div class="card-icon">⚖️</div>
+                    </div>
+                    <div class="card-description" data-en="Bias assessment, fairness metrics, diverse training data, human oversight, documentation" data-es="Evaluación de sesgo, métricas de equidad, datos de entrenamiento diversos, supervisión humana, documentación">Bias assessment, fairness metrics, diverse training data, human oversight, documentation</div>
+                    <span class="status-badge status-high-value" data-en="Non-Negotiable" data-es="Innegociable">Non-Negotiable</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Privacy & Compliance" data-es="Privacidad y Cumplimiento">Privacy & Compliance</div>
+                        </div>
+                        <div class="card-icon">🔐</div>
+                    </div>
+                    <div class="card-description" data-en="PIA, data minimization, consent mgmt, retention limits, privacy-preserving techniques" data-es="Evaluación de impacto en privacidad, minimización de datos, gestión de consentimiento, límites de retención">PIA, data minimization, consent mgmt, retention limits, privacy-preserving techniques</div>
+                    <span class="status-badge status-high-value" data-en="Regulatory" data-es="Regulatorio">Regulatory</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Security" data-es="Seguridad">Security</div>
+                        </div>
+                        <div class="card-icon">🛡️</div>
+                    </div>
+                    <div class="card-description" data-en="Access control, encryption, secure development, adversarial testing, monitoring, backup/recovery" data-es="Control de acceso, cifrado, desarrollo seguro, pruebas adversarias, monitoreo, copia de seguridad">Access control, encryption, secure development, adversarial testing, monitoring, backup/recovery</div>
+                    <span class="status-badge status-high-value" data-en="Continuous" data-es="Continua">Continuous</span>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="Governance Operating Model" data-es="Modelo Operativo de Gobernanza">Governance Operating Model</div>
+            
+            <table class="metric-table">
+                <thead>
+                    <tr>
+                        <th data-en="Layer" data-es="Capa">Layer</th>
+                        <th data-en="Focus" data-es="Enfoque">Focus</th>
+                        <th data-en="Ownership" data-es="Propiedad">Ownership</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-en="Strategic" data-es="Estratégica">Strategic</td>
+                        <td data-en="AI Strategy, Principles, Budget, Regulatory" data-es="Estrategia de IA, Principios, Presupuesto, Regulatorio">AI Strategy, Principles, Budget, Regulatory</td>
+                        <td data-en="CEO, CDO, Chief Legal Officer" data-es="CEO, CDO, Director Legal">CEO, CDO, Chief Legal Officer</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Policy & Standards" data-es="Política y Estándares">Policy & Standards</td>
+                        <td data-en="Governance Policies, Standards, Audit, Best Practices" data-es="Políticas de Gobernanza, Estándares, Auditoría, Mejores Prácticas">Governance Policies, Standards, Audit, Best Practices</td>
+                        <td data-en="Center of Excellence, Compliance" data-es="Centro de Excelencia, Cumplimiento">Center of Excellence, Compliance</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Operational" data-es="Operacional">Operational</td>
+                        <td data-en="Design, Build, Ethics Review, Security, Monitoring" data-es="Diseño, Construcción, Revisión de Ética, Seguridad, Monitoreo">Design, Build, Ethics Review, Security, Monitoring</td>
+                        <td data-en="Project Teams, Data Scientists" data-es="Equipos de Proyecto, Científicos de Datos">Project Teams, Data Scientists</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Oversight" data-es="Supervisión">Oversight</td>
+                        <td data-en="Project Review, Incident Investigation, Policy Evolution" data-es="Revisión de Proyecto, Investigación de Incidentes, Evolución de Política">Project Review, Incident Investigation, Policy Evolution</td>
+                        <td data-en="AI Governance Council" data-es="Consejo de Gobernanza de IA">AI Governance Council</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-title" data-en="OECD AI Principles Alignment" data-es="Alineación de Principios de IA de la OCDE">OECD AI Principles Alignment</div>
+            
+            <div class="roadmap-container">
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Principle 1: Human-Centered Values" data-es="Principio 1: Valores Centrados en el Ser Humano">Principle 1: Human-Centered Values</div>
+                    <div class="roadmap-phase-desc" data-en="Ethics review process ensuring fairness, non-discrimination, respect for human rights" data-es="Proceso de revisión de ética que asegure equidad, no discriminación, respeto de derechos humanos">Ethics review process ensuring fairness, non-discrimination, respect for human rights</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Principle 2: Transparency & Explainability" data-es="Principio 2: Transparencia y Explicabilidad">Principle 2: Transparency & Explainability</div>
+                    <div class="roadmap-phase-desc" data-en="Documentation of model logic, limitations, performance; explainability analysis; disclosure" data-es="Documentación de lógica del modelo, limitaciones, desempeño; análisis de explicabilidad; divulgación">Documentation of model logic, limitations, performance; explainability analysis; disclosure</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Principle 3: Robustness, Security, Safety" data-es="Principio 3: Robustez, Seguridad, Seguridad">Principle 3: Robustness, Security, Safety</div>
+                    <div class="roadmap-phase-desc" data-en="Security controls, adversarial testing, drift monitoring, fallback mechanisms" data-es="Controles de seguridad, pruebas adversarias, monitoreo de deriva, mecanismos de reversión">Security controls, adversarial testing, drift monitoring, fallback mechanisms</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Principle 4: Accountability" data-es="Principio 4: Responsabilidad">Principle 4: Accountability</div>
+                    <div class="roadmap-phase-desc" data-en="Clear ownership, audit trails, incident response, liability assignment" data-es="Propiedad clara, pistas de auditoría, respuesta a incidentes, asignación de responsabilidad">Clear ownership, audit trails, incident response, liability assignment</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Principle 5: Sustainable Development" data-es="Principio 5: Desarrollo Sostenible">Principle 5: Sustainable Development</div>
+                    <div class="roadmap-phase-desc" data-en="Societal impact assessment, equity, inclusion, environmental sustainability, community benefit" data-es="Evaluación de impacto social, equidad, inclusión, sostenibilidad ambiental, beneficio comunitario">Societal impact assessment, equity, inclusion, environmental sustainability, community benefit</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROADMAP TAB -->
+        <div id="roadmap" class="tab-content">
+            <div class="section-title" data-en="12-Month Implementation Roadmap" data-es="Roadmap de Implementación de 12 Meses">12-Month Implementation Roadmap</div>
+            
+            <div class="roadmap-container">
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Months 1-2: Foundation" data-es="Meses 1-2: Fundación">Months 1-2: Foundation</div>
+                    <div class="roadmap-phase-desc" data-en="Executive alignment, current-state assessment, governance structure, data governance framework design" data-es="Alineación ejecutiva, evaluación del estado actual, estructura de gobernanza, diseño del marco de gobernanza de datos">Executive alignment, current-state assessment, governance structure, data governance framework design</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Months 2-3: Quick Wins" data-es="Meses 2-3: Ganancias Rápidas">Months 2-3: Quick Wins</div>
+                    <div class="roadmap-phase-desc" data-en="Identify 3-5 high-value use cases, MVP development, SSOT pilot, privacy assessment process launch" data-es="Identificar 3-5 casos de uso de alto valor, desarrollo MVP, piloto SSOT, lanzamiento de proceso de evaluación de privacidad">Identify 3-5 high-value use cases, MVP development, SSOT pilot, privacy assessment process launch</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Months 3-6: Scale" data-es="Meses 3-6: Escala">Months 3-6: Scale</div>
+                    <div class="roadmap-phase-desc" data-en="Scale quick-win use cases, deploy governance policies, implement quality monitoring, ethics review process, measurement dashboards" data-es="Escalar casos de uso de éxito rápido, desplegar políticas de gobernanza, implementar monitoreo de calidad, proceso de revisión de ética, paneles de medición">Scale quick-win use cases, deploy governance policies, implement quality monitoring, ethics review process, measurement dashboards</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Months 6-9: Expand" data-es="Meses 6-9: Expandir">Months 6-9: Expand</div>
+                    <div class="roadmap-phase-desc" data-en="Mature scale operations, launch incubation use cases, expand SSOT, conduct governance audits" data-es="Madurar operaciones de escala, lanzar casos de uso de incubación, expandir SSOT, realizar auditorías de gobernanza">Mature scale operations, launch incubation use cases, expand SSOT, conduct governance audits</div>
+                </div>
+                <div class="roadmap-phase">
+                    <div class="roadmap-phase-title" data-en="Months 9-12: Optimize" data-es="Meses 9-12: Optimizar">Months 9-12: Optimize</div>
+                    <div class="roadmap-phase-desc" data-en="Consolidate learnings, build business case for ongoing funding, develop AI talent roadmap, plan next phases" data-es="Consolidar aprendizajes, construir caso de negocio para financiación continua, desarrollar roadmap de talento de IA, planificar fases siguientes">Consolidate learnings, build business case for ongoing funding, develop AI talent roadmap, plan next phases</div>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="Resource Requirements & Investment" data-es="Requisitos de Recursos e Inversión">Resource Requirements & Investment</div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="People Investment" data-es="Inversión en Personas">People Investment</div>
+                        </div>
+                        <div class="card-icon">👥</div>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="CDO/Chief AI Officer" data-es="CDO/Director de IA">CDO/Chief AI Officer</span>
+                        <span class="metric-value">1 FTE</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Data Governance Lead" data-es="Líder de Gobernanza de Datos">Data Governance Lead</span>
+                        <span class="metric-value">1 FTE</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Data Engineers" data-es="Ingenieros de Datos">Data Engineers</span>
+                        <span class="metric-value">2-3 per pipeline</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Data Scientists" data-es="Científicos de Datos">Data Scientists</span>
+                        <span class="metric-value">1-2 per use case</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Technology Investment" data-es="Inversión en Tecnología">Technology Investment</div>
+                        </div>
+                        <div class="card-icon">💻</div>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Cloud Platform (AWS/Azure/GCP)" data-es="Plataforma en Nube">Cloud Platform</span>
+                        <span class="metric-value">$50-100K/yr</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Data Governance Tool" data-es="Herramienta de Gobernanza">Data Governance Tool</span>
+                        <span class="metric-value">$50-150K/yr</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Analytics & BI Tools" data-es="Herramientas Analytics y BI">Analytics & BI Tools</span>
+                        <span class="metric-value">$50-150K/yr</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Security & Monitoring" data-es="Seguridad y Monitoreo">Security & Monitoring</span>
+                        <span class="metric-value">$50-100K/yr</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" data-en="Total Year 1 Investment" data-es="Inversión Total Año 1">Total Year 1 Investment</div>
+                        </div>
+                        <div class="card-icon">💰</div>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="People + Infrastructure + Tools" data-es="Personas + Infraestructura + Herramientas">People + Infrastructure + Tools</span>
+                        <span class="metric-value">$500K-$1M</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Training & Advisory" data-es="Capacitación y Asesoría">Training & Advisory</span>
+                        <span class="metric-value">$100-200K</span>
+                    </div>
+                    <div class="card-metric">
+                        <span class="metric-label" data-en="Expected ROI (Conservative)" data-es="ROI Esperado (Conservador)">Expected ROI (Conservative)</span>
+                        <span class="metric-value">2-3x</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title" data-en="Success Metrics" data-es="Métricas de Éxito">Success Metrics</div>
+            
+            <table class="metric-table">
+                <thead>
+                    <tr>
+                        <th data-en="Tier" data-es="Nivel">Tier</th>
+                        <th data-en="Metric" data-es="Métrica">Metric</th>
+                        <th data-en="Frequency" data-es="Frecuencia">Frequency</th>
+                        <th data-en="Target" data-es="Objetivo">Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-en="Strategic" data-es="Estratégica">Strategic</td>
+                        <td data-en="% Revenue from AI Products" data-es="% de Ingresos de Productos de IA">% Revenue from AI Products</td>
+                        <td data-en="Quarterly" data-es="Trimestral">Quarterly</td>
+                        <td data-en="5-10% by end Year 1" data-es="5-10% para fin de Año 1">5-10% by end Year 1</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Strategic" data-es="Estratégica">Strategic</td>
+                        <td data-en="AI Use Cases in Production" data-es="Casos de Uso de IA en Producción">AI Use Cases in Production</td>
+                        <td data-en="Quarterly" data-es="Trimestral">Quarterly</td>
+                        <td data-en="5-8 use cases by Year 1" data-es="5-8 casos de uso por Año 1">5-8 use cases by Year 1</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Operational" data-es="Operacional">Operational</td>
+                        <td data-en="Data Quality Score" data-es="Puntuación de Calidad de Datos">Data Quality Score</td>
+                        <td data-en="Monthly" data-es="Mensual">Monthly</td>
+                        <td data-en="95%+ across priority domains" data-es="95%+ en dominios prioritarios">95%+ across priority domains</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Operational" data-es="Operacional">Operational</td>
+                        <td data-en="Security Incidents" data-es="Incidentes de Seguridad">Security Incidents</td>
+                        <td data-en="Ongoing" data-es="Continuo">Ongoing</td>
+                        <td data-en="Zero AI-related incidents" data-es="Cero incidentes relacionados con IA">Zero AI-related incidents</td>
+                    </tr>
+                    <tr>
+                        <td data-en="Portfolio" data-es="Cartera">Portfolio</td>
+                        <td data-en="Use Case ROI" data-es="ROI del Caso de Uso">Use Case ROI</td>
+                        <td data-en="Per Project" data-es="Por Proyecto">Per Project</td>
+                        <td data-en="2x+ within 12 months" data-es="2x+ en 12 meses">2x+ within 12 months</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p data-en="AI Strategy Dashboard • Data, Analytics, and Generative AI - From Promise to Execution • LATAM Edition" data-es="Panel de Estrategia de IA • Datos, Analytics e IA Generativa - De la Promesa a la Ejecución • Edición LATAM">AI Strategy Dashboard • Data, Analytics, and Generative AI - From Promise to Execution • LATAM Edition</p>
+        <p data-en="© 2026 | Based on research from OECD, Iansiti & Lakhani, AI Index Report, BCG" data-es="© 2026 | Basado en investigación de OCDE, Iansiti & Lakhani, Informe de Índice de IA, BCG">© 2026 | Based on research from OECD, Iansiti & Lakhani, AI Index Report, BCG</p>
+    </div>
+
+    <script>
+        let currentLanguage = 'en';
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update language button active state
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update all elements with data attributes
+            document.querySelectorAll('[data-en][data-es]').forEach(element => {
+                if (lang === 'en') {
+                    element.textContent = element.getAttribute('data-en');
+                } else {
+                    element.textContent = element.getAttribute('data-es');
+                }
+            });
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activate corresponding nav tab
+            event.target.classList.add('active');
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize language on page load
+        window.addEventListener('load', () => {
+            setLanguage('en');
+        });
+
+        // Add card click handlers for matrix cells
+        document.querySelectorAll('.matrix-cell').forEach(cell => {
+            cell.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
